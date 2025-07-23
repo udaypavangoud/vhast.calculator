@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator (India) - vhast.calculator</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.07);
+        }
+
+        /* Header & Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #00538a;
+            color: white;
+        }
+        .header .logo {
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .header .sign-in {
+            color: white;
+            text-decoration: none;
+        }
+
+        .main-nav {
+            display: flex;
+            background-color: #00538a;
+            padding: 0 20px;
+        }
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .main-nav a.active, .main-nav a:hover {
+            background-color: #85ba31;
+        }
+
+        .breadcrumbs {
+            padding: 15px 20px;
+            font-size: 12px;
+            color: #555;
+            background-color: #eef2f5;
+        }
+        .breadcrumbs a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        h1 {
+            color: #00538a;
+            font-size: 28px;
+            padding: 20px 20px 0;
+            margin-bottom: 10px;
+        }
+        
+        .page-intro {
+            padding: 0 20px 20px;
+            color: #555;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .left-column {
+            flex: 1;
+            min-width: 0;
+        }
+        .right-column {
+            width: 300px;
+            flex-shrink: 0;
+        }
+        
+        /* Calculator Widget */
+        .calculator-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .calculator-inputs { flex: 1; }
+        .calculator-results { width: 40%; }
+        
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input[type="text"], .input-group input[type="number"], .input-group select {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+        }
+        .input-group .input-with-addon { display: flex; }
+        .input-group .input-with-addon input { flex: 1; border-radius: 3px 0 0 3px; }
+        .input-group .input-with-addon span { padding: 8px; background-color: #e9ecef; border: 1px solid #ced4da; border-left: none; border-radius: 0 3px 3px 0; }
+        
+        .costs-section {
+            border-top: 1px solid #dee2e6;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        
+        .calculator-buttons { margin-top: 20px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .btn-calculate { background-color: #85ba31; color: white; }
+        .btn-clear { background-color: #6c757d; color: white; margin-left: 10px; }
+
+        /* Results Section */
+        .results-box {
+            background-color: #e9f5e9;
+            padding: 15px;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+        }
+        .results-box h3 { margin: 0 0 10px; font-size: 16px; }
+        .results-box .monthly-pay { font-size: 28px; color: #388e3c; font-weight: bold; margin-bottom: 15px; }
+        .results-box .result-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;}
+        
+        .chart-placeholder {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #f1f3f5;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* Amortization & Other Sections */
+        h2 {
+            font-size: 22px;
+            color: #00538a;
+            border-bottom: 2px solid #00538a;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        
+        .amortization-section { display: flex; gap: 20px; }
+        .amortization-table-wrapper { flex: 1; max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; }
+        .amortization-chart { width: 40%; }
+        
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th, .data-table td {
+            padding: 8px;
+            text-align: right;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .data-table thead th {
+            background-color: #343a40;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        .data-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .data-table td:first-child, .data-table th:first-child { text-align: center; }
+        .data-table td:nth-child(2) { text-align: left; }
+        
+        .text-content {
+            margin-top: 30px;
+            padding-bottom: 30px;
+            line-height: 1.7;
+            color: #495057;
+        }
+        .text-content h3 { color: #00538a; font-size: 18px; }
+        .text-content ul { padding-left: 20px; }
+        .text-content li { margin-bottom: 10px; }
+
+        /* Right Sidebar */
+        .right-column .sidebar-widget { border: 1px solid #dee2e6; margin-bottom: 20px; }
+        .right-column .widget-title { background-color: #343a40; color: white; padding: 10px; font-weight: bold; }
+        .right-column .widget-content { padding: 15px; background-color: #f8f9fa; }
+        .right-column .sidebar-links ul { list-style:none; padding:0; margin:0; }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <a href="#" class="logo">vhast.calculator</a>
+        <a href="#" class="sign-in">sign in</a>
+    </header>
+
+    <nav class="main-nav">
+        <a href="#" class="active">FINANCIAL</a>
+        <a href="#">FITNESS & HEALTH</a>
+        <a href="#">MATH</a>
+        <a href="#">OTHER</a>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="#">home</a> / <a href="#">financial</a> / mortgage calculator
+        </div>
+        
+        <h1>Mortgage Calculator (India)</h1>
+        <p class="page-intro">Estimate your monthly mortgage payment (EMI) and see a complete amortization schedule. Modify the values to see how they affect your payments.</p>
+        
+        <main class="main-content">
+            <div class="left-column">
+                <div class="calculator-container">
+                    <div class="calculator-inputs">
+                        <div class="input-group">
+                            <label for="propertyValue">Property Value</label>
+                            <input type="text" id="propertyValue" value="₹5,000,000">
+                        </div>
+                        <div class="input-group">
+                            <label for="downPayment">Down Payment</label>
+                            <div class="input-with-addon">
+                                <input type="number" id="downPayment" value="20" min="0" step="1">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="loanTenure">Loan Tenure</label>
+                            <div class="input-with-addon">
+                                <input type="number" id="loanTenure" value="20" min="1" step="1">
+                                <span>years</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="interestRate">Interest Rate</label>
+                             <div class="input-with-addon">
+                                <input type="number" id="interestRate" value="8.5" step="0.01" min="0">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="costs-section">
+                            <input type="checkbox" id="includeCosts" checked>
+                            <label for="includeCosts" style="display:inline; font-weight:bold;">Include Other Costs Below</label>
+                            <div class="input-group" style="margin-top:10px;">
+                                <label for="propertyTaxes">Annual Property Tax & Dues</label>
+                                <input type="text" id="propertyTaxes" value="₹20,000">
+                            </div>
+                             <div class="input-group">
+                                <label for="homeInsurance">Annual Home Insurance</label>
+                                <input type="text" id="homeInsurance" value="₹5,000">
+                            </div>
+                        </div>
+                        <div class="calculator-buttons">
+                            <button class="btn btn-calculate" id="calculateBtn">Calculate</button>
+                            <button class="btn btn-clear" id="clearBtn">Clear</button>
+                        </div>
+                    </div>
+                    <div class="calculator-results">
+                        <div class="results-box">
+                            <h3>Monthly Payment (EMI):</h3>
+                            <div class="monthly-pay" id="monthlyPayResult">₹0</div>
+                            <div class="result-item"><span >Principal & Interest</span> <span id="principalInterestResult">₹0</span></div>
+                            <div class="result-item"><span >Property Tax / Dues</span> <span id="taxResult">₹0</span></div>
+                            <div class="result-item"><span >Home Insurance</span> <span id="insuranceResult">₹0</span></div>
+                            <hr>
+                            <div class="result-item"><strong>Total Monthly Outlay</strong> <strong id="totalOutlayResult">₹0</strong></div>
+                        </div>
+                         <div class="chart-placeholder" id="summaryChart">
+                           Summary will appear here.
+                         </div>
+                    </div>
+                </div>
+
+                <div class="text-content">
+                    <h2>Understanding Your Mortgage Calculator Results</h2>
+                    <p>
+                        This mortgage calculator is designed to give you a clear and detailed estimate of your financial commitments when buying a property in India. By inputting key variables like the property's value, your down payment, loan tenure, and interest rate, you can instantly see your Equated Monthly Instalment (EMI).
+                    </p>
+                
+                    <h3>What is a Mortgage EMI?</h3>
+                    <p>
+                        An Equated Monthly Instalment (EMI) is a fixed payment amount made by a borrower to a lender at a specified date each calendar month. EMIs are used to pay off both interest and principal each month so that over a specified number of years, the loan is paid off in full. Our calculator breaks down how much of your payment goes towards the principal amount and how much is for interest.
+                    </p>
+
+                    <h3>Key Factors Affecting Your Mortgage EMI</h3>
+                    <ul>
+                        <li><strong>Principal Loan Amount:</strong> This is the total amount borrowed from the lender after your down payment. A higher loan amount directly leads to a higher EMI.</li>
+                        <li><strong>Interest Rate:</strong> This is the rate at which the bank charges you for the loan. Even a small change in the interest rate can significantly impact the total interest paid over the life of the loan.</li>
+                        <li><strong>Loan Tenure:</strong> This is the duration for which the loan is taken. A longer tenure reduces your monthly EMI but increases the total interest you pay. A shorter tenure increases the EMI but saves you a substantial amount in interest.</li>
+                    </ul>
+
+                    <h3>How to Use the Amortization Schedule</h3>
+                    <p>
+                        The amortization schedule generated above provides a year-by-year (or month-by-month) breakdown of your mortgage repayment. It shows exactly how much of each payment is applied to the interest and how much is applied to reducing your principal balance. Initially, a larger portion of your EMI goes towards interest. As the loan matures, a larger portion goes towards the principal. This table is an excellent tool for understanding the long-term journey of your mortgage.
+                    </p>
+                </div>
+                
+                <h2>Amortization Schedule</h2>
+                <div class="amortization-section">
+                     <div class="amortization-table-wrapper">
+                         <table class="data-table">
+                             <thead>
+                                 <tr><th>Year</th><th>Month</th><th>Interest Paid</th><th>Principal Paid</th><th>Ending Balance</th></tr>
+                             </thead>
+                             <tbody id="amortizationTbody">
+                                 <!-- Rows will be generated by JavaScript -->
+                             </tbody>
+                         </table>
+                     </div>
+                      <div class="amortization-chart">
+                          <div class="chart-placeholder" style="height:300px;" id="amortizationGraph">
+                            Amortization summary will appear here.
+                          </div>
+                      </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                 <div class="sidebar-widget">
+                    <div class="widget-title">Financial Calculators</div>
+                    <div class="widget-content">
+                       <!-- Links can be added here -->
+                       <p>Explore other financial tools to manage your budget and investments effectively.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+             <a href="#">about us</a> | <a href="#">sitemap</a> | <a href="#">terms of use</a> | <a href="#">privacy policy</a>
+             <br>
+             © 2024 - 2025 vhast.calculator
+        </footer>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calculateBtn = document.getElementById('calculateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const inputs = document.querySelectorAll('.calculator-inputs input');
+
+        const parseCurrency = (value) => parseFloat(String(value).replace(/₹|,/g, '')) || 0;
+        const formatCurrency = (value) => new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+
+        function calculateAndDisplay() {
+            const propertyValue = parseCurrency(document.getElementById('propertyValue').value);
+            const downPaymentPercent = parseFloat(document.getElementById('downPayment').value) || 0;
+            const loanTenureYears = parseInt(document.getElementById('loanTenure').value) || 0;
+            const interestRateAnnual = parseFloat(document.getElementById('interestRate').value) || 0;
+            const includeCosts = document.getElementById('includeCosts').checked;
+            const propertyTaxesAnnual = includeCosts ? parseCurrency(document.getElementById('propertyTaxes').value) : 0;
+            const homeInsuranceAnnual = includeCosts ? parseCurrency(document.getElementById('homeInsurance').value) : 0;
+
+            const downPaymentAmount = propertyValue * (downPaymentPercent / 100);
+            const loanAmount = propertyValue - downPaymentAmount;
+
+            if (loanAmount <= 0 || loanTenureYears <= 0 || interestRateAnnual <= 0) {
+                // Reset display for invalid inputs
+                document.getElementById('monthlyPayResult').textContent = '₹0';
+                document.getElementById('principalInterestResult').textContent = '₹0';
+                document.getElementById('taxResult').textContent = '₹0';
+                document.getElementById('insuranceResult').textContent = '₹0';
+                document.getElementById('totalOutlayResult').textContent = '₹0';
+                document.getElementById('amortizationTbody').innerHTML = '<tr><td colspan="5">Please enter valid loan details.</td></tr>';
+                return;
+            }
+
+            const interestRateMonthly = (interestRateAnnual / 100) / 12;
+            const loanTenureMonths = loanTenureYears * 12;
+
+            const emi = loanAmount * interestRateMonthly * Math.pow(1 + interestRateMonthly, loanTenureMonths) / (Math.pow(1 + interestRateMonthly, loanTenureMonths) - 1);
+
+            const taxMonthly = propertyTaxesAnnual / 12;
+            const insuranceMonthly = homeInsuranceAnnual / 12;
+            const totalMonthlyPayment = emi + taxMonthly + insuranceMonthly;
+
+            document.getElementById('monthlyPayResult').textContent = formatCurrency(totalMonthlyPayment);
+            document.getElementById('principalInterestResult').textContent = formatCurrency(emi);
+            document.getElementById('taxResult').textContent = formatCurrency(taxMonthly);
+            document.getElementById('insuranceResult').textContent = formatCurrency(insuranceMonthly);
+            document.getElementById('totalOutlayResult').textContent = formatCurrency(totalMonthlyPayment);
+
+            let balance = loanAmount;
+            let totalInterestPaid = 0;
+            const amortizationTbody = document.getElementById('amortizationTbody');
+            amortizationTbody.innerHTML = ''; 
+
+            for (let month = 1; month <= loanTenureMonths; month++) {
+                const interestForMonth = balance * interestRateMonthly;
+                const principalForMonth = emi - interestForMonth;
+                balance -= principalForMonth;
+                totalInterestPaid += interestForMonth;
+                
+                if (balance < 0) balance = 0;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${Math.ceil(month / 12)}</td>
+                    <td>${month}</td>
+                    <td>${formatCurrency(interestForMonth)}</td>
+                    <td>${formatCurrency(principalForMonth)}</td>
+                    <td>${formatCurrency(balance)}</td>
+                `;
+                amortizationTbody.appendChild(row);
+            }
+
+            const totalPayment = emi * loanTenureMonths;
+            document.getElementById('summaryChart').innerHTML = `
+                <strong>Loan Summary</strong><br>
+                Loan Amount: ${formatCurrency(loanAmount)}<br>
+                Total Interest: ${formatCurrency(totalInterestPaid)}<br>
+                Total Paid (P+I): ${formatCurrency(totalPayment)}
+            `;
+            document.getElementById('amortizationGraph').innerHTML = `
+                 <strong>Loan Payoff Summary</strong><br>
+                 Principal: ${formatCurrency(loanAmount)}<br>
+                 Interest: ${formatCurrency(totalInterestPaid)}<br>
+                 Tenure: ${loanTenureYears} Years
+            `;
+        }
+
+        function clearForm() {
+            document.getElementById('propertyValue').value = '₹5,000,000';
+            document.getElementById('downPayment').value = '20';
+            document.getElementById('loanTenure').value = '20';
+            document.getElementById('interestRate').value = '8.5';
+            document.getElementById('includeCosts').checked = true;
+            document.getElementById('propertyTaxes').value = '₹20,000';
+            document.getElementById('homeInsurance').value = '₹5,000';
+            calculateAndDisplay();
+        }
+
+        calculateBtn.addEventListener('click', calculateAndDisplay);
+        clearBtn.addEventListener('click', clearForm);
+        inputs.forEach(input => input.addEventListener('keyup', calculateAndDisplay));
+        inputs.forEach(input => input.addEventListener('change', calculateAndDisplay));
+        
+        // Initial calculation on page load
+        calculateAndDisplay();
+    });
+</script>
+
+</body>
+</html>
